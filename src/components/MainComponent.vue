@@ -18,15 +18,11 @@ const loading = ref(true);
 const error = ref(null);
 let map = null;
 
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleString();
-};
-
 const fetchTrackData = async () => {
   try {
     loading.value = true;
     error.value = null;
-    const response = await axios.get('http://localhost:3000');
+    const response = await axios.get(import.meta.env.APIURL);
     trackData.value = response.data;
   } catch (err) {
     error.value = `Error loading track data: ${err.message}`;
@@ -95,7 +91,7 @@ const initializeMap = async (track) => {
     source: vectorSource,
     style: new Style({
       stroke: new Stroke({
-        color: '#0066cc',
+        color: 'red',
         width: 3
       })
     })
