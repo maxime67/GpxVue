@@ -22,7 +22,7 @@ const fetchTrackData = async () => {
   try {
     loading.value = true;
     error.value = null;
-    const response = await axios.get(import.meta.env.APIURL);
+    const response = await axios.get(import.meta.env.VITE_APIURL);
     trackData.value = response.data;
   } catch (err) {
     error.value = `Error loading track data: ${err.message}`;
