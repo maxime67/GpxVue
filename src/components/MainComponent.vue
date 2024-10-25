@@ -20,8 +20,11 @@ const trackData = ref(null);
 const loading = ref(true);
 const error = ref(null);
 const selectedTrack = ref(null);
+const isMenuOpen = ref(false); // New state for mobile menu
 
-
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
 const initializeMap = async (track) => {
   if (!track.track.points.length) return;
   selectedTrack.value = track;
@@ -93,12 +96,56 @@ onBeforeUnmount(() => {
 });
 </script>
 
-
 <template>
-  <div class="bg-gray-100 flex flex-row">
+  <div class="bg-gray-100 flex flex-col md:flex-row min-h-screen relative">
+    <!-- Mobile Menu Button -->
+    <button
+        @click="toggleMenu"
+        class="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-indigo-600 text-white"
+    >
+      <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+      >
+        <path
+            v-if="!isMenuOpen"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M4 6h16M4 12h16M4 18h16"
+        />
+        <path
+            v-else
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+
+    <!-- Sidebar Navigation -->
     <aside
         v-if="trackData"
-        class="top-0 left-0 w-72 h-screen duration-300 ease-in-out bg-white shadow-lg">
+        :class="{
+        'translate-x-0': isMenuOpen,
+        '-translate-x-full': !isMenuOpen,
+        'fixed': true,
+        'md:relative': true,
+        'md:translate-x-0': true,
+        'z-40': true,
+        'transition-transform': true,
+        'duration-300': true,
+        'ease-in-out': true,
+        'bg-white': true,
+        'shadow-lg': true,
+        'h-screen': true,
+        'w-72': true,
+      }"
+    >
       <div class="h-full flex flex-col">
         <div class="px-6 py-4 bg-indigo-600">
           <h2 class="text-xl font-semibold text-white">Track List</h2>
@@ -108,10 +155,9 @@ onBeforeUnmount(() => {
             <li v-for="track in trackData" :key="track.track.name">
               <button
                   @click="initializeMap(track)"
-                  style="rgba(245, 40, 145, 0.8)"
                   class="w-full px-4 py-3 flex flex-col rounded-lg transition-all duration-200
-                       hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500
-                       group relative overflow-hidden"
+                     hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500
+                     group relative overflow-hidden"
               >
                 <span class="text-gray-800 font-medium group-hover:text-indigo-600">
                   {{ track.track.name }}
@@ -128,10 +174,19 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </aside>
-    <div class="flex-1 p-6">
+
+    <!-- Overlay for mobile -->
+    <div
+        v-if="isMenuOpen"
+        @click="toggleMenu"
+        class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+    ></div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-6 md:p-6 pt-20 md:pt-6">
       <div v-if="selectedTrack" class="mb-6">
         <h2 class="text-2xl font-bold text-gray-800 mb-4">{{ selectedTrack.track.name }}</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="bg-white rounded-xl shadow-sm p-4">
             <div class="text-sm text-gray-500 mb-1">Duration</div>
             <div class="text-xl font-semibold text-gray-800">
@@ -141,21 +196,13 @@ onBeforeUnmount(() => {
           <div class="bg-white rounded-xl shadow-sm p-4">
             <div class="text-sm text-gray-500 mb-1">Average Speed</div>
             <div class="text-xl font-semibold text-gray-800">
-              {{
-                compute.calculateAverageSpeed(compute.computeAllDistance(selectedTrack.track.points) / 1000, compute.getTimeDurationInHours(selectedTrack))
-              }} km/h
+              {{ compute.calculateAverageSpeed(compute.computeAllDistance(selectedTrack.track.points) / 1000, compute.getTimeDurationInHours(selectedTrack)) }} km/h
             </div>
           </div>
           <div class="bg-white rounded-xl shadow-sm p-4">
             <div class="text-sm text-gray-500 mb-1">Distance</div>
             <div class="text-xl font-semibold text-gray-800">
               {{ compute.computeAllDistance(selectedTrack.track.points) / 1000 }} km
-            </div>
-          </div>
-          <div class="bg-white rounded-xl shadow-sm p-4">
-            <div class="text-sm text-gray-500 mb-1">Max Speed</div>
-            <div class="text-xl font-semibold text-gray-800">
-              <!--              {{ computeAllDistance(selectedTrack.track.points) }} km/h-->
             </div>
           </div>
           <div class="bg-white rounded-xl shadow-sm p-4">
@@ -180,7 +227,6 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-/* Ensure the OpenLayers map container takes full size */
 .ol-viewport {
   width: 100% !important;
   height: 100% !important;
