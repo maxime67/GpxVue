@@ -15,6 +15,11 @@ coverage
 *.local
 .env
 ./.env
+<<<<<<< HEAD
+=======
+*.env
+
+>>>>>>> f02512b1a4c490f4c6ee8995ff28fe42761991c6
 /cypress/videos/
 /cypress/screenshots/
 

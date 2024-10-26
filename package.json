@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "axios": "^1.7.7",
+    "geolib": "^3.3.4",
     "ol": "^10.2.1",
     "ol-contextmenu": "^5.5.0",
     "ol-ext": "^4.0.24",
