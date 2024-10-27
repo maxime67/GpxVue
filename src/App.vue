@@ -1,11 +1,10 @@
 <script setup>
-import MainComponent from './components/MainComponent.vue'
-import Track from './components/Track.vue'
+import NavbarView from "@/components/view/NavbarView.vue";
 </script>
 
 <template>
-  <MainComponent/>
-<!--  <Track/>-->
+  <NavbarView></NavbarView>
+  <RouterView></RouterView>
 </template>
 
 <style scoped>

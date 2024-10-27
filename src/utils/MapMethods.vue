@@ -4,6 +4,8 @@ import {LineString, Point} from "ol/geom.js";
 import {fromLonLat} from "ol/proj.js";
 import {Circle, Fill, Stroke, Style} from "ol/style.js";
 
+
+
 export const createStartEndPoints = (points) => {
   if (!points.length) return [];
 

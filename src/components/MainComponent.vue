@@ -1,20 +1,17 @@
 <script setup>
-import {ref, onMounted, watchEffect, onBeforeUnmount} from 'vue';
+import {ref, onMounted} from 'vue';
 import {Map, View} from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import OSM from 'ol/source/OSM';
-import {Feature} from 'ol';
-import {Point} from 'ol/geom';
 import {fromLonLat} from 'ol/proj';
 import {Style, Stroke, Circle, Fill} from 'ol/style';
 import 'ol/ol.css';
-import * as compute from "../utils/ComputeMethods.vue"
-import * as mapp from "../utils/MapMethods.vue"
-import * as api from "../utils/ApiMethods.vue"
+import * as computeService from "../utils/ComputeMethods.vue"
+import * as mapService from "../utils/MapMethods.vue"
+import * as apiService from "../utils/ApiMethods.vue"
 
-const mapRef = ref(null);
 let map = ref(null);
 const trackData = ref(null);
 const loading = ref(true);
@@ -27,24 +24,23 @@ const toggleMenu = () => {
 };
 const initializeMap = async (track) => {
   if (!track.track.points.length) return;
-  selectedTrack.value = track;
   setTimeout(() => {
-    if (map.value) {
-      // Remove all layers
-      map.value.getLayers().clear();
-      // Remove all interactions
-      map.value.getInteractions().clear();
-      // Remove all controls
-      map.value.getControls().clear();
-      // Set target to null
-      map.value.setTarget(null);
-      map.value = null;
-    }
-    // Clear the map container
-    const mapElement = document.getElementById('map');
-    if (mapElement) {
+    //Clear the map container
+    selectedTrack.value = track;
+    if(map.value){
+      mapService.clearMap(map)
+        // Remove all layers
+        map.value.getLayers().clear();
+        // Remove all interactions
+        map.value.getInteractions().clear();
+        // Remove all controls
+        map.value.getControls().clear();
+        // Set target to null
+        map.value.setTarget(null);
+        map.value = null;
+      }
+      const mapElement = document.getElementById('map');
       mapElement.innerHTML = '';
-    }
     const vectorSource = new VectorSource();
 
     const vectorLayer = new VectorLayer({
@@ -74,8 +70,8 @@ const initializeMap = async (track) => {
       })
     });
 
-    const trackFeature = mapp.createTrackFeature(track.track.points);
-    const pointFeatures = mapp.createStartEndPoints(track.track.points);
+    const trackFeature = mapService.createTrackFeature(track.track.points);
+    const pointFeatures = mapService.createStartEndPoints(track.track.points);
 
     vectorSource.addFeature(trackFeature);
     pointFeatures.forEach(feature => vectorSource.addFeature(feature));
@@ -86,14 +82,9 @@ const initializeMap = async (track) => {
 };
 
 onMounted(async () => {
-  await api.fetchTrackData(error, loading, trackData);
+  await apiService.fetchData(error, loading, trackData, "/gpx");
 });
-onBeforeUnmount(() => {
-  if (map) {
-    map.setTarget(null);
-    map = null;
-  }
-});
+
 </script>
 
 <template>
@@ -163,7 +154,7 @@ onBeforeUnmount(() => {
                   {{ track.track.name }}
                 </span>
                 <span class="text-sm text-gray-500 mt-1">
-                  Temps: {{ compute.renderTimeDuration(compute.getTimeDuration(track)) }}
+                  Temps: {{ computeService.renderTimeDuration(computeService.getTimeDuration(track)) }}
                 </span>
                 <div class="absolute inset-0 border-2 border-indigo-600 opacity-0
                           group-hover:opacity-10 rounded-lg transition-opacity duration-200">
@@ -190,25 +181,27 @@ onBeforeUnmount(() => {
           <div class="bg-white rounded-xl shadow-sm p-4">
             <div class="text-sm text-gray-500 mb-1">Duration</div>
             <div class="text-xl font-semibold text-gray-800">
-              {{ compute.renderTimeDuration(compute.getTimeDuration(selectedTrack)) }}
+              {{ computeService.renderTimeDuration(computeService.getTimeDuration(selectedTrack)) }}
             </div>
           </div>
           <div class="bg-white rounded-xl shadow-sm p-4">
             <div class="text-sm text-gray-500 mb-1">Average Speed</div>
             <div class="text-xl font-semibold text-gray-800">
-              {{ compute.calculateAverageSpeed(compute.computeAllDistance(selectedTrack.track.points) / 1000, compute.getTimeDurationInHours(selectedTrack)) }} km/h
+              {{
+                computeService.calculateAverageSpeed(computeService.computeAllDistance(selectedTrack.track.points) / 1000, computeService.getTimeDurationInHours(selectedTrack))
+              }} km/h
             </div>
           </div>
           <div class="bg-white rounded-xl shadow-sm p-4">
             <div class="text-sm text-gray-500 mb-1">Distance</div>
             <div class="text-xl font-semibold text-gray-800">
-              {{ compute.computeAllDistance(selectedTrack.track.points) / 1000 }} km
+              {{ computeService.computeAllDistance(selectedTrack.track.points) / 1000 }} km
             </div>
           </div>
           <div class="bg-white rounded-xl shadow-sm p-4">
             <div class="text-sm text-gray-500 mb-1">Elevation Gain</div>
             <div class="text-xl font-semibold text-gray-800">
-              {{ compute.calculateElevationGain(selectedTrack.track.points) }}m
+              {{ computeService.calculateElevationGain(selectedTrack.track.points) }}m
             </div>
           </div>
         </div>
