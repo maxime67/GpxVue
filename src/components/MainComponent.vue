@@ -82,6 +82,7 @@ const initializeMap = async (track) => {
 };
 
 onMounted(async () => {
+  console.log(import.meta.env.VITE_APIURL + "/gpx")
   await apiService.fetchData(error, loading, trackData, "/gpx");
 });
 
